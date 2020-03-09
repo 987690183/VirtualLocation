@@ -4,7 +4,9 @@ No jailbreak needed,It is an osx software,it can modify the system positioning o
 #Using
 Before using it, your iOS device needs to have the corresponding version of DeveloperImage installed and You can find the DeveloperImage file under '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/DeviceSupport/*.*/DeveloperDiskImage.dmg'
 
-If you have installed it, you can see the following
+If you have installed it, you can see the following on the iOS device settings page
+
+
 
 - ![developePre.PNG](developePre.PNG)
 
