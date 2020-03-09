@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<style type="text/css">
+    body, html, #allmap{width: 100%;height: 100%;margin:0;font-family:"微软雅黑";font-size:14px;}
+    
+    .search {
+        float: left;
+        width: 310px;
+        height: 38px;
+        background: #FFF;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        position: relative;
+    }
+    
+    .search>input[type="text"] {
+        width: 220px;
+        height: 20px;
+        line-height: 20px;
+        margin-top: 9px;
+        padding: 0 15px;
+        font-size: 14px;
+        outline: 0 none;
+        border: none;
+        float: left;
+    }
+    
+    .search>input::-webkit-input-placeholder {
+        color: #999;
+    }
+    
+    .search>input::-moz-placeholder {
+        color: #999;
+    }
+    
+    .search>input:-ms-input-placeholder {
+        color: #999;
+    }
+    
+    .clear span {
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+        background: url(tools_search_remove.png) no-repeat;
+        background-size: 16px;
+        background-position-y: 0;
+        content: " ";
+        cursor: pointer;
+        position: absolute;
+        top: 11px;
+        right: 65px;
+    }
+    
+    .search .searchBox:hover {
+        background-position-y: -16px;
+    }
+    
+    .search .searchBox:active {
+        background-position-y: -32px;
+    }
+    
+    .clear>input[type="text"] {
+        width: 210px;
+        padding-left: 15px;
+        padding-right: 22px;
+    }
+    
+    .search>a {
+        outline: 0 none;
+        display: block;
+        float: right;
+        width: 59px;
+        height: 38px;
+        border: none;
+        background: #FFF url(search.png) no-repeat center center;
+        cursor: pointer;
+        position: relative;
+    }
+    
+    .search>a:hover {
+        background-color: #eee;
+    }
+    
+    .search>a:active {
+        background-color: #c9dbf9;
+    }
+    
+    .search>a::before {
+        content: " ";
+        display: block;
+        width: 1px;
+        height: 30px;
+        background: #eee;
+        position: absolute;
+        left: -1px;
+        top: 50%;
+        margin-top: -15px;
+    }
+    
+    #est_switch {
+        width: 109px;
+        height: 19px;
+        line-height: 1;
+        padding-top: 4px;
+        box-sizing: border-box;
+        font-size: 12px;
+        color: #888;
+        position: absolute;
+        top: -19px;
+    }
+    
+    #est_switch.back_cn {
+        background: url(est_cn.png) no-repeat;
+        background-size: 109px 19px;
+    }
+    
+    #est_switch.back_en {
+        background: url(est_en.png) no-repeat;
+        background-size: 109px 19px;
+    }
+    
+    #est_switch .est_cn {
+        width: 50%;
+        text-align: center;
+        display: inline-block;
+        float: left;
+        cursor: pointer;
+        text-indent: -2px;
+    }
+    
+    #est_switch .est_en {
+        width: 50%;
+        text-align: center;
+        display: inline-block;
+        float: left;
+        cursor: pointer;
+        text-indent: -2px;
+    }
+    
+    #est_switch .active {
+        cursor: auto;
+        color: #444;
+    }
+    
+    
+
+	</style>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=8k4npquW0GpxyvO4WKcZ1O3DHxR2qNMc"></script>
+    <script type="text/javascript" src="./coordtransform.js"></script>
+	<title>地图展示</title>
+</head>
+<body>
+    <div id="allmap">
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    var geoc;
+	// 百度地图API功能
+	var map = new BMap.Map("allmap");    // 创建Map实例
+    var point = new BMap.Point(116.404, 39.915);
+	map.centerAndZoom(point, 11);  // 初始化地图,设置中心点坐标和地图级别
+    geoc = new BMap.Geocoder();
+    // 定义一个控件类,即function
+    function ZoomControl(){
+        // 默认停靠位置和偏移量
+        this.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;
+        this.defaultOffset = new BMap.Size(15, 30);
+    }
+
+     // 通过JavaScript的prototype属性继承于BMap.Control
+     ZoomControl.prototype = new BMap.Control();
+     
+     // 自定义控件必须实现自己的initialize方法,并且将控件的DOM元素返回
+     // 在本方法中创建个div元素作为控件的容器,并将其添加到地图容器中
+     ZoomControl.prototype.initialize = function(map){
+         var div = document.createElement("div");   // 创建一个新的DOM元素
+         
+         var search = document.createElement("div");
+         search.className = 'search';
+         
+         var clearBtn = document.createElement('span');
+         clearBtn.className = 'searchBox'
+         search.appendChild(clearBtn);
+         
+         var searchInput = document.createElement("input");
+         searchInput.id = 'suggestId';
+         searchInput.setAttribute('type', 'text');
+         searchInput.setAttribute('placeholder', 'Please enter the address');
+         searchInput.setAttribute('size', '20');
+         search.appendChild(searchInput);
+         
+         // 输入框回车
+         searchInput.onkeydown = function (event) {
+             var e = event || window.event;
+             if (e && e.keyCode == 13) {
+                 serachPlace();
+             }
+         };
+         // 监听输入框
+         searchInput.addEventListener("input", function (event) {
+                                     
+                                      var val = event.target.value;
+                                      // 有内容则显示清空按钮
+                                      if (val.length > 0) {
+                                      search.classList.add("clear");
+                                      } else {
+                                      search.classList.remove("clear");
+                                      }
+                                      
+                                      });
+                                      
+                                     
+         var submitBtn = document.createElement('a');
+         search.appendChild(submitBtn);
+         submitBtn.addEventListener('click', function () {
+                serachPlace();
+         });
+         div.appendChild(search);
+                                                                 
+        // 清空按钮点击事件
+                                                                 
+        clearBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                search.classList.remove("clear");
+        });
+                                                                                           
+        var searchResultPanel = document.createElement('div');
+        searchResultPanel.id = 'searchResultPanel';
+        searchResultPanel.style.display = 'none';
+        div.appendChild(searchResultPanel);
+        map.getContainer().appendChild(div);
+        return div;
+     }
+
+
+     // 创建控件
+     var myZoomCtrl = new ZoomControl();
+     // 添加到地图当中
+     map.addControl(myZoomCtrl);
+     
+     function G(id) {
+         return document.getElementById(id);
+     }
+     // 自动补齐
+     var ac = new BMap.Autocomplete({
+                                "input": "suggestId",
+                                "location": map,
+                                });
+                                
+                                
+                                ac.addEventListener("onhighlight", function(e) {  //鼠标放在下拉列表上的事件
+                                                    var str = "";
+                                                    var _value = e.fromitem.value;
+                                                    var value = "";
+                                                    if (e.fromitem.index > -1) {
+                                                    value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+                                                    }
+                                                    str = "FromItem<br />index = " + e.fromitem.index + "<br />value = " + value;
+                                                    
+                                                    value = "";
+                                                    if (e.toitem.index > -1) {
+                                                    _value = e.toitem.value;
+                                                    value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+                                                    }
+                                                    str += "<br />ToItem<br />index = " + e.toitem.index + "<br />value = " + value;
+                                                    G("searchResultPanel").innerHTML = str;
+                                                    });
+                                                    
+                                                    var myValue;
+                                                    ac.addEventListener("onconfirm", function(e) {    //鼠标点击下拉列表后的事件
+                                                                        var _value = e.item.value;
+                                                                        myValue = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+                                                                        G("searchResultPanel").innerHTML ="onconfirm<br />index = " + e.item.index + "<br />myValue = " + myValue;
+                                                                        
+                                                                        setPlace();
+                                                                        });
+                                                                        
+                                                                        function setPlace(){
+                                                                            map.clearOverlays();    //清除地图上所有覆盖物
+                                                                            function myFun(){
+                                                                                var pp = local.getResults().getPoi(0).point;    //获取第一个智能搜索的结果
+                                                                                map.centerAndZoom(pp, 18);
+                                                                                map.addOverlay(new BMap.Marker(pp));    //添加标注
+                                                                                var converResult = convertPoint(pp.lng,pp.lat);
+                                                                                var finalObj = { "lng": converResult[0], "lat": converResult[1]};
+                                                                                window.webkit.messageHandlers.jsCallOc.postMessage(finalObj);
+
+                                                                                
+                                                                            }
+                                                                            var local = new BMap.LocalSearch(map, { //智能搜索
+                                                                                                             onSearchComplete: myFun
+                                                                                                             });
+                                                                                                             local.search(myValue);
+                                                                        }
+
+function outofchina(lng, lat) {
+    var lat = +lat;
+    var lng = +lng;
+    // 纬度3.86~53.55,经度73.66~135.05
+    return !(lng > 73.66 && lng < 135.05 && lat > 3.86 && lat < 53.55);
+};
+
+function convertPoint(lng, lat) {
+        var bd09togcj02 = coordtransform.bd09togcj02(lng, lat);
+        var isOutchina = outofchina(bd09togcj02[0],bd09togcj02[1]);
+        if(isOutchina){
+            return [lng,lat]
+        }else{
+            var pt_wgs84 = coordtransform.gcj02towgs84(bd09togcj02[0], bd09togcj02[1]);
+            return pt_wgs84
+        }
+}
+
+function serachPlace(){
+    function myFun(){
+        var pp = local.getResults().getPoi(0).point;    //获取第一个智能搜索的结果
+        map.centerAndZoom(pp, 18);
+        map.addOverlay(new BMap.Marker(pp));    //添加标注
+        var converResult = convertPoint(pp.lng,pp.lat);
+        var finalObj = { "lng": converResult[0], "lat": converResult[1]};        window.webkit.messageHandlers.jsCallOc.postMessage(finalObj);
+    }
+    
+    if (G('suggestId').value) {
+        var local = new BMap.LocalSearch(map, {
+                                         renderOptions: {map: map},
+                                         onSearchComplete: myFun
+                                         });
+                                         local.search(G('suggestId').value);
+    }
+}
+                                
+                               
+	//添加地图类型控件
+	map.addControl(new BMap.MapTypeControl({
+		mapTypes:[
+            BMAP_NORMAL_MAP,
+            BMAP_HYBRID_MAP
+        ]}));	  
+	map.setCurrentCity("北京");          // 设置地图显示的城市 此项是必须设置的
+	map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+    
+    var bottom_right_control = new BMap.ScaleControl({anchor: BMAP_ANCHOR_BOTTOM_RIGHT});// 右上角，添加比例尺
+    var bottom_right_navigation = new BMap.NavigationControl({anchor: BMAP_ANCHOR_BOTTOM_RIGHT});  //右上角，添加默认缩放平移控件
+    function add_control(){
+        map.addControl(bottom_right_control);
+        map.addControl(bottom_right_navigation);
+    }
+
+    function showInfo(e){
+        map.clearOverlays(); //清楚所有标注
+        var converResult = convertPoint(e.point.lng,e.point.lat);
+        var finalObj = { "lng": converResult[0], "lat": converResult[1]};
+        var marker = new BMap.Marker(e.point);  // 创建标注
+        map.addOverlay(marker);               // 将标注添加到地图中
+        window.webkit.messageHandlers.jsCallOc.postMessage(finalObj);
+    }
+    map.addEventListener("click", showInfo);
+    
+    
+    var geolocation = new BMap.Geolocation(); //进行定位
+    geolocation.getCurrentPosition(function(r){
+                                   if(this.getStatus() == BMAP_STATUS_SUCCESS){
+                                   var mk = new BMap.Marker(r.point);
+                                   map.addOverlay(mk);
+                                   map.panTo(r.point);//定位成功
+                                   showInfo(r);
+                                   }
+                                   else {
+                                       //如果定位失败
+                                         // 初始化地图,设置中心点坐标和地图级别
+                                  
+
+
+                                   }
+                                   },{enableHighAccuracy: true})
+    
+    //无参数函数  js与oc之间的调用
+<!--    function testA() {-->
+<!--        window.webkit.messageHandlers.jsCallOc.postMessage("");-->
+<!--    }-->
+<!---->
+<!--    //有参数函数-->
+<!--    function testB(value) {-->
+<!--       window.webkit.messageHandlers.jsCallOc.postMessage("call oc");-->
+<!--    }-->
+<!--    //有参-->
+<!--    function testC(value) {-->
+<!--      var finalObj = { "name": "chaman", "age": "18", "sex": "male" };-->
+<!--      window.webkit.messageHandlers.jsCallOc.postMessage(finalObj);-->
+<!--    }-->
+
+    
+    
+</script>
