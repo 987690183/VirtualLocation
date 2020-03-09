@@ -14,4 +14,6 @@ The software UI is as follows
 
 - ![virtuallocationPre.png](virtuallocationPre.png)
 
+This program is for discussion and learning only, other commercial uses are strictly prohibited
+
 
