@@ -10,6 +10,6 @@ If you have installed it, you can see the following
 
 The software UI is as follows
 
-- ![virtuallocationPre.PNG](virtuallocationPre.PNG)
+- ![virtuallocationPre.png](virtuallocationPre.png)
 
 
