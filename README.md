@@ -6,4 +6,5 @@ Before using it, your iOS device needs to have the corresponding version of Deve
 
 If you have installed it, you can see the following
 
+- ![developerimagePre.PNG](developerimagePre.PNG)
 
