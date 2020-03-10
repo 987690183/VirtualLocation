@@ -2,6 +2,7 @@
 No jailbreak needed,It is an OSX software,it can modify the system positioning of iOS devices and simulate any location 
 
 # Installation
+Pre-built binaries can be found on our release page:[Releases](https://github.com/robbluolei/VirtualLocation/releases)	
 If you prefer building from source, start by cloning the repo with the command:
 
 git clone https://github.com/robbluolei/VirtualLocation.git
