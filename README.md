@@ -3,6 +3,7 @@ No jailbreak needed,It is an OSX software,it can modify the system positioning o
 
 # Installation
 If you prefer building from source, start by cloning the repo with the command:
+
 git clone https://github.com/robbluolei/VirtualLocation.git
 
 # Usage
