@@ -150,26 +150,6 @@
         
         NSLog(@"response: %@ error: %@", response, error);
     }];
-//    //调用js无参函数
-//    [webView evaluateJavaScript:@"testA()" completionHandler:^(id _Nullable response, NSError * _Nullable error) {
-//
-//        //js函数调用return,这里才会有东西,否则无任何信息。
-//        NSLog(@"response: %@ error: %@", response, error);
-//    }];
-//
-//    //调用js有参函数
-//    [webView evaluateJavaScript:[NSString stringWithFormat:@"testB('%@')",@"show"] completionHandler:^(id _Nullable response, NSError * _Nullable error) {
-//
-//        //js函数调用return,这里才会有东西,否则无任何信息。
-//        NSLog(@"response: %@ error: %@", response, error);
-//    }];
-//
-//    //调用js有参函数并获得返回值
-//    [webView evaluateJavaScript:[NSString stringWithFormat:@"testC('%@')",@"return value"] completionHandler:^(id _Nullable response, NSError * _Nullable error) {
-//
-//        //js函数调用return,这里才会有东西,否则无任何信息。
-//        NSLog(@"response: %@ error: %@", response, error);
-//    }];
 }
 
 
